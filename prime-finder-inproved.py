@@ -1,18 +1,27 @@
 #!/usr/bin/env python3
 
+'''
+
+    The idea is that you can shift a primes iteration to another bus and
+    test it against the primes on that bus. If no divisor, prime!
+    Would be faster than testing all primes iterations
+
+'''
+
 from decimal import *
 import math
 import numpy as np
 import time
 import os.path
 
-def iteration(n, m, addOne=True):
-    return (n//m)+(1 if addOne else 0)
+
+def iteration(n, m):
+    return (n//m)+1
 
 i = 1
 m = 24
 
-to_what_number = 10000
+to_what_number = 120
 end = iteration(to_what_number,m)+1
 
 f_name = 'prime_bus.npz'
@@ -69,43 +78,33 @@ def prime(n, b_idx, i):
         #print("%s: ...to sub prime bus %d for prime %d" % (n, ps_cross_bus, ps_n))
         #print("%s: ...n_i is %d iteration is %d" % (n, n_i, ps_n))
 
-
-        ## nasty hack for rounding errors on 23
         ps_cross_i = iteration(n_i,ps_n)
 
         # grab the number to multiply
         #print("%d: ...taking nominal iteration of %d into %d, got %d" % (n,n_i,ps_n,ps_cross_i))
 
-        addOne = True
         # getting ready to find sub bus location
-        ps_cross_i_n = ((ps_cross_i-1)*ps_n)
-
-        if ps_n == 1 and ps_cross_i >= m:
-            addOne = False
-
-        ps_loc = iteration(ps_n*ps_cross_bus,m, addOne=addOne)+ps_cross_i_n
+        ps_loc = iteration(ps_n*ps_cross_bus,m)+((ps_cross_i-1)*ps_n)
 
         #math.floor((ps_n*ps_cross_bus)/24)+1+((ps_cross_i-1)*ps_n)
 
         #print("%d: ..loc invalid? (%d, %d, %d)" % (n, ps_loc, b, i))
 
-        '''
-        if n == 557:
-            print("%s: ...to sub prime bus %d for sub prime %d" % (n, ps_cross_bus, ps_n))
+        if n == 73:
+            print("%s: ...to sub prime bus %d for prime %d" % (n, ps_cross_bus, ps_n))
             print("%s: ...n_i is %d and %d is sub prime iteration" % (n, n_i, ps_n_i))
-            print("%d: ...taking nominal iteration of %d into %d, got %d (-1)" % (n,n_i,ps_n,ps_cross_i))
+            print("%d: ...taking nominal iteration of %d into %d, got %d" % (n,n_i,ps_n,ps_cross_i))
             print("%d: ..loc invalid? (%d, %d, %d)" % (n, ps_loc, b, i))
             print(bus[0])
             print(b_idx)
             print(ps_cross_bus)
             print(ps_n*ps_cross_bus)
-            print(ps_cross_i-1)
-            print(iteration(ps_n*ps_cross_bus,m, addOne=addOne))
-            print((ps_cross_i-1)*ps_n)
-            print(n_i,ps_n,ps_n_i,ps_cross_bus,ps_cross_i,ps_loc,ps_cross_i_n)
-            print(i == ps_loc, i, ps_loc)
+            print(iteration(ps_n*ps_cross_bus,m))
+            print(bus)
+
+            print(n_i,ps_n,ps_n_i,ps_cross_bus,ps_cross_i,ps_loc)
             quit()
-        '''
+
 
         if (i == ps_loc):
             #print("...Invalidated %d with %d" % (n, ps_n))
@@ -164,8 +163,7 @@ print("CPU process time: %.1f [min]" % ((t2_stop-t2_start)/60))
 print("Found %d primes" % len(primes))
 print("Outputting primes to disk and saving hash")
 
-if (use_hash):
-    np.savez_compressed(f_name, primeBusData=primeBusData, last_p_on_hash=last_p_on_hash)
+np.savez_compressed(f_name, primeBusData=primeBusData, last_p_on_hash=last_p_on_hash)
 
 with open('primes.txt', 'w') as f:
     for item in primes:
